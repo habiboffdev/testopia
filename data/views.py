@@ -34,7 +34,7 @@ def upload_file(request: HttpRequest) -> HttpResponse:
         if form.is_valid():
             try:
                 file = request.FILES['file']
-                file_path = os.path.join('D:\\PycharmProjects\\Loyiha-1\\data', file.name)
+                file_path = os.path.join('D:\\PycharmProjects\\Loyiha-1\\files', file.name)
                 with open(file_path, 'wb') as destination:
                     for chunk in file.chunks():
                         destination.write(chunk)
@@ -45,6 +45,7 @@ def upload_file(request: HttpRequest) -> HttpResponse:
                 generator.dump_tests(data)
                 create_question(data,test)
                 excel_file = pd.read_excel(file_path)
+
                 return render(request, 'success.html', {'excel_data': excel_file.to_html()})
             except Exception as e:
                 logging.error(e)

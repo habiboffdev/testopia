@@ -9,7 +9,7 @@ class Question(models.Model):
     text = models.CharField(max_length=500,null=True,blank=True)
     points = models.FloatField(default=1.0)
     options = models.IntegerField(default=0)
-    order = models.IntegerField(default=0)
+    order = models.IntegerField(default=0,unique=True)
 
     def __str__(self):
         return self.text
@@ -45,18 +45,41 @@ class Choice(models.Model):
 
 
 class UserChoice(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"User: {self.user.username}, Question: {self.question.text}, Choice: {self.choice.text}"
+    
+class UserTest(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(TestModel, on_delete=models.CASCADE)
+    correct = models.IntegerField(default=0)
+    incorrect = models.IntegerField(default=0)
+    total = models.FloatField(default=0)
+    started_time = models.DateTimeField(auto_now_add=True)
+    ended_time = models.DateTimeField(auto_now_add=False,null=True,blank=True)
+    def __str__(self):
+        return f"{self.user.username}-{self.quiz}"
+    class Meta:
+        verbose_name_plural = "User Tests"
+
+
+class UserAnswer(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    choices = models.ManyToManyField(UserChoice)
+    quiz = models.ForeignKey(TestModel, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return f"{self.user.username}"
+    class Meta:
+        verbose_name_plural = "User Answers"
 
 class OngoingTests(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     quiz = models.OneToOneField(TestModel, on_delete=models.CASCADE)
-    time = models.DateTimeField(auto_now_add=True)
+    started_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user.username}-{self.quiz}"

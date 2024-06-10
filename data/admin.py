@@ -1,6 +1,6 @@
 from django.contrib import admin
 # from django.contrib.admin.actions import delete_selected as original_delete_selected
-from .models import TestModel, Question, Choice, UserChoice, OngoingTests
+from .models import TestModel, Question, Choice, UserChoice, OngoingTests, UserTest, UserAnswer
 import os
 from django.conf import settings
 def delete_model(modeladmin, request, queryset):
@@ -29,6 +29,19 @@ class QuizAdmin(admin.ModelAdmin):
 class OngoingTestsAdmin(admin.ModelAdmin):
     list_display = ['user','quiz']
 
+class UserAnswerAdmin(admin.ModelAdmin):
+    list_display = ['user','quiz']
+    list_filter = ['user','quiz']
+    filter_horizontal = ('choices',)
+    search_fields = ['user__username','quiz__name']
+class UserTestAdmin(admin.ModelAdmin):
+    list_display = ['user','quiz','correct','incorrect','total','started_time','ended_time']
+    list_filter = ['user','quiz']
+    search_fields = ['user__username','quiz__name']
+
+    
 admin.site.register(TestModel, QuizAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(OngoingTests, OngoingTestsAdmin)
+admin.site.register(UserTest, UserTestAdmin)
+admin.site.register(UserAnswer, UserAnswerAdmin)
