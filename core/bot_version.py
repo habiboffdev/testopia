@@ -143,34 +143,53 @@ def tests_function(msg: Message):
         objects = [f"{object[1]}-{object[0]}" for object in objects]
         mark = genlist_markup(list(objects))
         bot.reply_to(msg, "📄Quyidagi testlardan birini tanlang👇", reply_markup=mark)
-        bot.register_next_step_handler(msg, test_step)
+        bot.register_next_step_handler(msg, test_info)
     except Exception as e:
         print("ERROR(tests_function): ", e)
 ongoing_tests = dict()
-def test_step(msg: Message):
+def test_info(msg : Message):
     try:
         test_id = msg.text.split("-")[0]
         test_model = TestModel.objects.get(id=test_id)
-        if OngoingTests.objects.filter(user=User.get(uid=msg.from_user.id)).first() is not None:
+        test_description = test_model.description
+        test_number_of_questions = test_model.count
+        test_full_mark = test_model.full_mark
+        test_name = test_model.name
+        bot.send_message(msg.chat.id,Texts.test_info.format(test_name=test_name,description=test_description,count=test_number_of_questions,full_mark=test_full_mark),
+                         reply_markup=InlineKeyboardMarkup(row_width=1).add(InlineKeyboardButton("Testni boshlash",callback_data="start_test-"+test_id)),parse_mode="HTML")
+    except Exception as e:
+        logging.error(e,stack_info=True)
+def test_step(msg:Message,test_id: str):
+    try:
+        # test_id = msg.text.split("-")[0]
+        # print(msg.chat.id)
+        test_model = TestModel.objects.get(id=test_id)
+        if OngoingTests.objects.filter(user=User.get(uid=msg.chat.id)).first() is not None:
             bot.send_message(msg.chat.id,Texts.have_already_started)
             return
         test = Test(bot,msg.chat.id,test_id)
         # Completely useless
-        new_test = OngoingTests.objects.create(quiz=test_model,user=User.get(uid=msg.from_user.id))
+        new_test = OngoingTests.objects.create(quiz=test_model,user=User.get(uid=msg.chat.id))
         new_test.save()
         # Ending useless part
         test.start()
-        ongoing_tests[msg.from_user.id] = test
+        ongoing_tests[msg.chat.id] = test
     except Exception as e:
         logging.error(e,stack_info=True)
 
 
-
+def del_msg(msg: Message):
+    bot.delete_message(msg.chat.id, msg.id)
 def check_test(callback: CallbackQuery):
     try:
-        is_finished = ongoing_tests[callback.message.chat.id].check_test(callback)
-        if is_finished:
-            del ongoing_tests[callback.message.chat.id]
-            OngoingTests.objects.filter(user=User.objects.get(uid=callback.message.chat.id)).delete()
+        if callback.data.startswith("start_test-"):
+            test_id = callback.data.split("-")[1]
+            del_msg(callback.message)
+            test_step(callback.message,test_id)
+        else:
+            is_finished = ongoing_tests[callback.message.chat.id].check_test(callback)
+            if is_finished:
+                del ongoing_tests[callback.message.chat.id]
+                OngoingTests.objects.filter(user=User.objects.get(uid=callback.message.chat.id)).delete()
     except Exception as e:
         logging.error(e)
