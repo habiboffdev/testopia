@@ -11,8 +11,8 @@ def gentest_markup(test:QuizUtil):
             # print(buttons)
             var = key.text
             if check.filter(choice=key).exists():
-                var = "✅ "+key
-            button = types.InlineKeyboardButton(var, callback_data=str(index))
+                var = "✅ "+key.text
+            button = types.InlineKeyboardButton(var, callback_data=str(key.id))
             buttons.append(button)
         if check!=-1:
             skip = types.InlineKeyboardButton('Keyingi',callback_data=f'next{check}',)

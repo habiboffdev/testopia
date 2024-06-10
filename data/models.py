@@ -9,7 +9,7 @@ class Question(models.Model):
     text = models.CharField(max_length=500,null=True,blank=True)
     points = models.FloatField(default=1.0)
     options = models.IntegerField(default=0)
-    order = models.IntegerField(default=0,unique=True)
+    order = models.IntegerField(default=0)
     is_multiple_choice = models.BooleanField(default=False)
     def __str__(self):
         return self.text
@@ -50,7 +50,7 @@ class UserChoice(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"User: {self.user.username}, Question: {self.question.text}, Choice: {self.choice.text}"
+        return f"Question: {self.question.id}, Choice: {self.choice.text}"
     
 class UserTest(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

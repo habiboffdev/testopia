@@ -29,8 +29,8 @@ from subprocess import Popen, PIPE
 
 # from greed_island.models import Tag
 
-bot.set_webhook(url=settings.NGROK_URL+settings.BOT_TOKEN,)
-print(settings.NGROK_URL+settings.BOT_TOKEN)
+# bot.set_webhook(url=settings.NGROK_URL+settings.BOT_TOKEN,)
+# print(settings.NGROK_URL+settings.BOT_TOKEN)
 @csrf_exempt
 def handle_webhook_requests(request):
     def setup(_bot: telebot.TeleBot, _request_id: str) -> None:

@@ -44,7 +44,7 @@ class Test:
         try:
             resp = callback.data
             msg = callback.message
-            quiz = self.testData.data[self.testData.current_question]
+            quiz = self.testData
             if resp == "back":
                 pass
             elif resp == "skip":
@@ -53,7 +53,7 @@ class Test:
                 self.new_test(msg)
             elif resp.isdigit():
                 self.testData.tick_answer(int(resp))
-                self.bot.edit_message_text(quiz["text"], msg.chat.id, msg.id,
+                self.bot.edit_message_text(quiz.current_question.text, msg.chat.id, msg.id,
                                       reply_markup=gentest_markup(self.testData), parse_mode="HTML")
             elif resp == "finish":
 

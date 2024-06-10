@@ -154,7 +154,7 @@ def test_step(msg: Message):
         if OngoingTests.objects.filter(user=User.get(uid=msg.from_user.id)).first() is not None:
             bot.send_message(msg.chat.id,Texts.have_already_started)
             return
-        test = Test(bot,msg.chat.id,test_model.uid)
+        test = Test(bot,msg.chat.id,test_id)
         # Completely useless
         new_test = OngoingTests.objects.create(quiz=test_model,user=User.get(uid=msg.from_user.id))
         new_test.save()
@@ -162,7 +162,7 @@ def test_step(msg: Message):
         test.start()
         ongoing_tests[msg.from_user.id] = test
     except Exception as e:
-        logging.error(e)
+        logging.error(e,stack_info=True)
 
 
 

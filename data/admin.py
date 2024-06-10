@@ -33,6 +33,7 @@ class UserAnswerAdmin(admin.ModelAdmin):
     list_display = ['user','quiz']
     list_filter = ['user','quiz']
     filter_horizontal = ('choices',)
+    ordering = ['id']
     search_fields = ['user__username','quiz__name']
 class UserTestAdmin(admin.ModelAdmin):
     list_display = ['user','quiz','correct','incorrect','total','started_time','ended_time']

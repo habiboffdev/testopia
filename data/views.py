@@ -17,8 +17,9 @@ from .forms import UploadFileForm
 # This function is not for requests, it is custom made
 def create_question(json, test:TestModel):
     questions = json[0]['questions']
+    cnt = 1
     for question in questions:
-        questionModel = Question(text=question['text'],options=len(question['keys']),points=1)
+        questionModel = Question(text=question['text'],options=len(question['keys']),points=1,order=cnt)
         questionModel.save()
         for index,option in enumerate(question['keys']):
             choice = Choice(text=option,is_correct=(question['correct_ans'] == index),question=questionModel)
@@ -26,6 +27,7 @@ def create_question(json, test:TestModel):
         questionModel.save()
         test.questions.add(questionModel)
         test.save()
+        cnt+=1
 @login_required
 def upload_file(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
