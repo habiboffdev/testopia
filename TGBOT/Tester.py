@@ -4,21 +4,24 @@ from telebot import TeleBot
 
 from telebot.types import Message, CallbackQuery
 from .buttons import gentest_markup, genlist_markup, remove_markup
-from .testModel import read_beta
+from .testModel import QuizUtil
+from core.models import User
+from data.models import Question
 from random import randint
 from time import time,sleep
 
 
 class Test:
-    def __init__(self, bot: TeleBot, chat_id: int, test_number: str):
+    def __init__(self, bot: TeleBot, chat_id: int, test_number: int):
         self.bot = bot
         self.chat_id = chat_id
+        self.user = User.get(uid=chat_id)
         self.test_number = test_number
         self.start_time = time()
         self.callback_handler = self.bot.callback_query_handler
         self.variant = randint(1, 1)
-        self.testData = read_beta(self.variant, self.test_number)
-        self.question = self.testData.get_question()
+        self.testData: QuizUtil = QuizUtil(test_number, self.user)
+        self.question: Question = self.testData.get_question()
         self.markup = gentest_markup(self.testData)
     def start(self):
         try:
@@ -29,12 +32,12 @@ class Test:
             sleep(3)
             self.bot.send_message(self.chat_id, f"Test boshlandi\nJami savollar:  {self.testData.number_of_questions}\nVariant: {self.variant}",
                              reply_markup=remove_markup())
-            self.bot.send_message(self.chat_id, self.question['text'], reply_markup=self.markup, parse_mode="HTML")
+            self.bot.send_message(self.chat_id, self.question.text, reply_markup=self.markup, parse_mode="HTML")
         except Exception as e:
             logging.error(e)
     def new_test(self,msg: Message):
-        self.testData.get_question()
-        self.bot.edit_message_text(self.testData.data[self.testData.current_question]["text"], msg.chat.id, msg.id,
+        self.question = self.testData.get_question()
+        self.bot.edit_message_text(self.question.text, msg.chat.id, msg.id,
                               reply_markup=gentest_markup(self.testData), parse_mode="HTML")
     # For using callback_handler
     def check_test(self,callback: CallbackQuery):

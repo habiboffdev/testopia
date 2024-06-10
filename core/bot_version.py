@@ -168,7 +168,6 @@ def test_step(msg: Message):
 
 def check_test(callback: CallbackQuery):
     try:
-        print("salom")
         is_finished = ongoing_tests[callback.message.chat.id].check_test(callback)
         if is_finished:
             del ongoing_tests[callback.message.chat.id]

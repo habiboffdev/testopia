@@ -1,17 +1,16 @@
 from telebot import types
-
-def gentest_markup(test):
+from .testModel import QuizUtil
+from data.models import Choice
+def gentest_markup(test:QuizUtil):
     try:
-        quiz = test.data[test.current_question]
-        print(quiz)
-        data = quiz
-        check = test.answers[test.current_question]
+        data = test
+        check = test.answers.choices
         markup = types.InlineKeyboardMarkup(row_width=1)
         buttons = []
-        for index,key in enumerate(data['keys']):
+        for index,key in enumerate(Choice.objects.filter(question=data.current_question)):
             # print(buttons)
-            var = key
-            if index == check and check!=-1:
+            var = key.text
+            if check.filter(choice=key).exists():
                 var = "✅ "+key
             button = types.InlineKeyboardButton(var, callback_data=str(index))
             buttons.append(button)

@@ -10,7 +10,7 @@ class Question(models.Model):
     points = models.FloatField(default=1.0)
     options = models.IntegerField(default=0)
     order = models.IntegerField(default=0,unique=True)
-
+    is_multiple_choice = models.BooleanField(default=False)
     def __str__(self):
         return self.text
 class TestModel(models.Model):
