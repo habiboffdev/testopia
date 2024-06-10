@@ -18,7 +18,7 @@ from .texts import Texts, Constants
 import logging
 from TGBOT.buttons import genlist_markup, gentest_markup
 from data.models import UserChoice,Question,TestModel, OngoingTests
-from TGBOT.Tester import Test
+from TGBOT.BotTest import Test
 # from utils.testerCallback import gentest_markup, genlist_markup, remove_markup
 # from utils.testModel import read_beta
 # import threading

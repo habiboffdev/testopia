@@ -4,7 +4,7 @@ from telebot import TeleBot
 
 from telebot.types import Message, CallbackQuery
 from .buttons import gentest_markup, genlist_markup, remove_markup
-from .testModel import QuizUtil
+from .TestDealer import QuizUtil
 from core.models import User
 from data.models import Question
 from random import randint

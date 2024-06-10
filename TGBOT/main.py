@@ -3,7 +3,7 @@ import time
 from telebot import TeleBot
 from telebot.types import Message, CallbackQuery
 from buttons import gentest_markup, genlist_markup, remove_markup
-from Tester import Test
+from TGBOT.BotTest import Test
 bot = TeleBot(token="6129241988:AAGSeBfqRlEM5-eQUDXpNwOhcMfojkeLDHs")
 # bot.delete_webhook()
 @bot.message_handler(commands=["start"])

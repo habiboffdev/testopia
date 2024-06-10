@@ -1,5 +1,5 @@
 from telebot import types
-from .testModel import QuizUtil
+from .TestDealer import QuizUtil
 from data.models import Choice
 def gentest_markup(test:QuizUtil):
     try:

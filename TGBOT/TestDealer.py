@@ -2,7 +2,7 @@ import time
 from data.models import TestModel, UserAnswer, UserChoice, Question, UserTest, Choice
 from core.models import User
 from django.utils import timezone
-from .readJson import readjson
+
 class QuizUtil:
     def __init__(self,test_id , user:User):
         self.data = TestModel.objects.get(id=test_id)
@@ -14,7 +14,6 @@ class QuizUtil:
         # self.answers = {i : -1 for i in range(self.number_of_questions)}
         self.current_question : Question = None
         self.current_question_number : int = 0
-        self.result = {i : {"Correct" : i, "Your ans": i} for i in range(self.number_of_questions)}
         self.user_test: UserTest = UserTest(user=user,quiz=self.data)
         self.user_test.save()
     def tick_answer(self, answer):
@@ -24,8 +23,8 @@ class QuizUtil:
             choice.save()
             if self.answers.choices.filter(question=self.current_question).exists() and not self.current_question.is_multiple_choice:
                 self.answers.choices.get(question=self.current_question).delete()
-            else:
-                self.answers.choices.add(choice)
+            
+            self.answers.choices.add(choice)
         except Exception as e:
             print("ERROR(tick_answer): ", e)
     def get_checked(self):
@@ -67,8 +66,3 @@ class QuizUtil:
             return points
         except Exception as e:
             print("ERROR(get_result): ", e)
-
-def read_beta(variant,id):
-    data = readjson(f"{id}.json")
-    test = 0
-    return test
