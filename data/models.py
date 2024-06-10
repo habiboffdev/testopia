@@ -7,7 +7,7 @@ from core.models import User
 # Create your models here.
 class Question(models.Model):
     text = models.CharField(max_length=500,null=True,blank=True)
-    points = models.FloatField(default=1.0)
+    point = models.FloatField(default=1.0)
     options = models.IntegerField(default=0)
     order = models.IntegerField(default=0)
     is_multiple_choice = models.BooleanField(default=False)
@@ -24,7 +24,9 @@ class TestModel(models.Model):
     isRated = models.BooleanField(default=True)
     description = models.TextField(null=True, blank=True)
     questions = models.ManyToManyField(Question, blank=True)
-
+    full_mark = models.FloatField(default=0)
+    
+    
     def __str__(self):
         return f"{self.name}"
     def delete(self, *args, **kwargs):

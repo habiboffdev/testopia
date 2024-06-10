@@ -18,16 +18,20 @@ from .forms import UploadFileForm
 def create_question(json, test:TestModel):
     questions = json[0]['questions']
     cnt = 1
+    sum_of_points: float = 0
     for question in questions:
-        questionModel = Question(text=question['text'],options=len(question['keys']),points=1,order=cnt)
+        questionModel = Question(text=question['text'],options=len(question['keys']),order=cnt)
         questionModel.save()
         for index,option in enumerate(question['keys']):
-            choice = Choice(text=option,is_correct=(question['correct_ans'] == index),question=questionModel)
+            choice = Choice(text=option,is_correct=(question['correct_ans'] == index),question=questionModel) # Creating Choice
             choice.save()
+        questionModel.point = question['point'] # Adding point
         questionModel.save()
         test.questions.add(questionModel)
-        test.save()
         cnt+=1
+        sum_of_points+=questionModel.point # sum of points
+    test.full_mark = sum_of_points
+    test.save()
 @login_required
 def upload_file(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':

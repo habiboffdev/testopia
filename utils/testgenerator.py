@@ -8,13 +8,13 @@ import pandas as pd
 
 class TestGenerator:
 
-    def __init__(self, variants, test_id, is_random=True, random_variants=True, ):
+    def __init__(self, variants, test_id, is_random=False, random_variants=False, ):
         self.is_random = is_random
         self.random_variants = random_variants
         self.number_of_variants = variants
         self.test_id = test_id
         self.BASE_DIR = Path(__file__).resolve().parent.parent
-        self.keys = ['A','B','C','D']
+        self.keys = ['A','B','C','D','point']
     def files_to_test(self, files: dict):
         try:
             full_data = []
@@ -52,7 +52,7 @@ class TestGenerator:
                 quiz = quizzes[random_quiz_number]
                 questions[quiz] = dict()
                 quizzes.remove(quiz)
-                for j in ['A', 'B', 'C', 'D']:
+                for j in self.keys:
                     questions[quiz][j] = tests[j].tolist()[quizzes_list2.index(quiz)]
                 if self.is_random:
                     num_quizzes -= 1
@@ -78,6 +78,7 @@ class TestGenerator:
                 for j in q_variants:
                     new_quizzes[i]['keys'].append(quizzes[quiz][j])
                 new_quizzes[i]['correct_ans'] = q_variants.index('A')
+                new_quizzes[i]['point'] = quizzes[quiz]['point']
             return new_quizzes
         except Exception as e:
             print("ERROR(correct_ans):", e.args)
