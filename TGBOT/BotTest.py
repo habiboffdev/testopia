@@ -7,8 +7,8 @@ from .buttons import gentest_markup, genlist_markup, remove_markup
 from .TestDealer import QuizUtil
 from core.models import User
 from data.models import Question
-from random import randint
-from time import time,sleep
+
+from time import sleep
 
 
 class Test:
@@ -17,16 +17,11 @@ class Test:
         self.chat_id = chat_id
         self.user = User.get(uid=chat_id)
         self.test_number = test_number
-        self.start_time = time()
-        self.callback_handler = self.bot.callback_query_handler
-        self.variant = randint(1, 1)
         self.testData: QuizUtil = QuizUtil(test_number, self.user)
         self.question: Question = self.testData.get_question()
         self.markup = gentest_markup(self.testData)
     def start(self):
         try:
-            self.start_time = time()
-
             self.bot.send_message(self.chat_id, "<i>⏰Test 3 sekundda boshlanadi...</i>",parse_mode='HTML')
 
             sleep(3)
@@ -61,6 +56,5 @@ class Test:
                 self.bot.send_message(msg.chat.id, "Natija: " + str(self.testData.get_result()) + "/" + str(self.testData.number_of_questions))
                 return 1
             return 0
-
         except Exception as e:
             logging.error(e)

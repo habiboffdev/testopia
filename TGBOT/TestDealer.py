@@ -1,4 +1,4 @@
-import time
+
 from data.models import TestModel, UserAnswer, UserChoice, Question, UserTest, Choice
 from core.models import User
 from django.utils import timezone
