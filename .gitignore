@@ -6,3 +6,5 @@ files/
 Pipfile.lock
 tests/
 inConsole/
+*/migrations/
+*/__pycache__/
