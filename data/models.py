@@ -66,27 +66,30 @@ class UserTest(models.Model):
         return f"{self.user.username}-{self.quiz}"
     class Meta:
         verbose_name_plural = "User Tests"
-class OngoingTests(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    quiz = models.OneToOneField(TestModel, on_delete=models.CASCADE)
-    started_time = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.user.username}-{self.quiz}"
-    class Meta:
-        verbose_name_plural = "Ongoing Tests"
-
-
 
 class UserAnswer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     choices = models.ManyToManyField(UserChoice)
     quiz = models.ForeignKey(TestModel, on_delete=models.CASCADE)
-    cached_test = models.ForeignKey(UserTest, on_delete=models.CASCADE,null=True,blank=True)
+
     def __str__(self):
         return f"{self.user.username}"
     class Meta:
         verbose_name_plural = "User Answers"
+class OngoingTests(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    quiz = models.OneToOneField(TestModel, on_delete=models.CASCADE)
+    started_time = models.DateTimeField(auto_now_add=True)
+    user_answers = models.ForeignKey(UserAnswer, on_delete=models.CASCADE,null=True,blank=True) 
+    
+    def __str__(self):
+        return f"{self.user.username}-{self.quiz}"
+    class Meta:
+        verbose_name_plural = "Ongoing Tests"
+    
+
+
+
 
 
 

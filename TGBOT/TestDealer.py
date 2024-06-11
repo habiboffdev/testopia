@@ -4,10 +4,11 @@ from core.models import User
 from django.utils import timezone
 
 class QuizUtil:
-    def __init__(self,test_id , user:User):
+    def __init__(self,test_id , user:User, user_answer: UserAnswer = None):
         self.data = TestModel.objects.get(id=test_id)
-        self.answers = UserAnswer(user=user,quiz=self.data)
-        self.answers.save()
+        self.answers = UserAnswer(user=user,quiz=self.data) if user_answer is None else user_answer
+        if self.answers.pk is None:
+            self.answers.save()
         self.time = 0
         self.user = user
         self.number_of_questions = self.data.questions.count()
@@ -56,7 +57,7 @@ class QuizUtil:
             for userchoice in self.answers.choices.all():
                 if userchoice.choice.is_correct:
                     correct_ans += 1
-                    points += userchoice.choice.question.points
+                    points += userchoice.choice.question.point
                 else:
                     incorrect_ans += 1
             self.user_test.correct = correct_ans

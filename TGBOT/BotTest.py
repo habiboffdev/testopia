@@ -12,7 +12,7 @@ from time import sleep
 
 
 class Test:
-    def __init__(self, bot: TeleBot, chat_id: int, test_number: int):
+    def __init__(self, bot: TeleBot, chat_id: int, test_number: int, user_answer = None):
         """
         Initialize a new Test instance.
 
@@ -34,7 +34,7 @@ class Test:
         self.test_number = test_number
 
         # Initialize the QuizUtil instance for the test.
-        self.testData: QuizUtil = QuizUtil(test_number, self.user)
+        self.testData: QuizUtil = QuizUtil(test_number, self.user,user_answer=user_answer)
 
         # Get the first question for the test.
         self.question: Question = self.testData.get_question()
@@ -188,4 +188,4 @@ class Test:
             return 0
         except Exception as e:
             # Log the error
-            logging.error(e)
+            logging.error(e,stack_info=True)

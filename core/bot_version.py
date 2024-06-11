@@ -22,11 +22,20 @@ from TGBOT.BotTest import Test
 # from utils.testerCallback import gentest_markup, genlist_markup, remove_markup
 # from utils.testModel import read_beta
 # import threading
-def is_registired(user_id: int, users: List[int]):
-    if not users:
-        users = [settings.DEV_ID]
-    registired = user_id in users or User.get(uid=user_id)
-    return registired
+def is_registered(user_id: int, registered_users: List[int] = None):
+    """Check if a user is registered.
+
+    Args:
+        user_id (int): The user ID to check registration status.
+        registered_users (List[int], optional): A list of registered user IDs.
+            Defaults to None.
+
+    Returns:
+        bool: True if the user is registered, False otherwise.
+    """
+    if not registered_users:
+        registered_users = [settings.DEV_ID]
+    return user_id in registered_users or User.objects.filter(uid=user_id).exists()
 
 
 class Testopia(TeleBot):
@@ -76,7 +85,7 @@ class Testopia(TeleBot):
             text = str(msg.text).strip(' ')
             # check the user exist because we need to find step
             step = None
-            if not is_registired(msg.from_user.id, []):
+            if not is_registered(msg.from_user.id, []):
                 try:
                     user = User(username=text, uid=msg.from_user.id, platform=0)
                     user.save()
@@ -113,7 +122,7 @@ bot = Testopia(token=settings.BOT_TOKEN)
 
 
 @bot.message_handler(commands=["start"])
-@lock_non_registered(checker=is_registired, default=bot.notify_register)
+@lock_non_registered(checker=is_registered, default=bot.notify_register)
 def command_handler(msg: Message):
     text = msg.text
     if len(text.split()) > 1:
@@ -141,16 +150,25 @@ def callback_handler(call: CallbackQuery):
         except Exception as e:
             logging.error(e)
 # @bot.message_handler(commands=['test'])
-def test_by_id(msg: Message):
+def test_by_id(msg: Message) -> None:
+    """
+    This function extracts the test_id from the message text and calls the test_info function.
+
+    Args:
+        msg (Message): The incoming message object.
+
+    Returns:
+        None
+    """
     try:
         text = msg.text
         test_id = text.split('=')[1]
         # Call the test_info function
         test_info(msg,test_id)
     except Exception as e:
-        logging.error("ERROR(test_by_id): ", e)
+        logging.error("ERROR(test_by_id): ", e) # log the error
 @bot.message_handler(commands=['tests'])
-@lock_non_registered(checker=is_registired, default=bot.notify_register)
+@lock_non_registered(checker=is_registered, default=bot.notify_register)
 def tests_function(msg: Message):
     try:
         objects = list(TestModel.objects.values_list("name","id"))
@@ -163,7 +181,10 @@ def tests_function(msg: Message):
 ongoing_tests = dict()
 def test_info(msg : Message, test_id: str = None):
     try:
-        test_id = msg.text.split("-")[0] if test_id is None else test_id
+        test_id = test_id if test_id is not None else msg.text.split('-')[0]
+        if OngoingTests.objects.filter(user=User.get(uid=msg.chat.id)).first() is not None:
+            bot.send_message(msg.chat.id,Texts.have_already_started, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(row_width=1).add(InlineKeyboardButton("Testga o'tish",callback_data="restart_test-"+test_id)))
+            return
         test_model = TestModel.objects.get(id=test_id)
         test_description = test_model.description
         test_number_of_questions = test_model.count
@@ -184,6 +205,7 @@ def test_step(msg:Message,test_id: str):
         test = Test(bot,msg.chat.id,test_id)
         # Completely useless
         new_test = OngoingTests.objects.create(quiz=test_model,user=User.get(uid=msg.chat.id))
+        new_test.user_answers=test.testData.answers
         new_test.save()
         # Ending useless part
         test.start()
@@ -194,21 +216,66 @@ def test_step(msg:Message,test_id: str):
 
 def del_msg(msg: Message):
     bot.delete_message(msg.chat.id, msg.id)
+
+
 def check_test(callback: CallbackQuery):
+    """
+    Handle the callback query for the test.
+
+    Args:
+        callback (CallbackQuery): The callback query object.
+
+    Returns:
+        None
+    """
     try:
+        # Check if the callback is for starting a new test
         if callback.data.startswith("start_test-"):
             test_id = callback.data.split("-")[1]
-            del_msg(callback.message)
-            test_step(callback.message,test_id)
+            del_msg(callback.message)  # Delete the previous message
+            test_step(callback.message, test_id)  # Start the test
+
+        # Check if the callback is for restarting an existing test
         elif callback.data.startswith("restart_test-"):
             test_id = callback.data.split("-")[1]
-            del_msg(callback.message)
+            del_msg(callback.message)  # Delete the previous message
+
+            # Check if the test is already ongoing
+            if ongoing_tests.get(callback.message.chat.id) is None:
+                # Create a new test instance
+                ongoing_tests[callback.message.chat.id] = Test(
+                    bot,
+                    callback.message.chat.id,
+                    test_id,
+                    OngoingTests.objects.get(
+                        user=User.objects.get(uid=callback.message.chat.id)
+                    ).user_answers
+                )
+
             test = ongoing_tests[callback.message.chat.id]
-            test.restart()
+            test.restart()  # Restart the test
+
+        # Check if the callback is for checking the test status
         else:
+            if ongoing_tests.get(callback.message.chat.id) is None:
+                # Create a new test instance if not already ongoing
+                ongoing_tests[callback.message.chat.id] = Test(
+                    bot,
+                    callback.message.chat.id,
+                    OngoingTests.objects.get(
+                        user=User.objects.get(uid=callback.message.chat.id)
+                    ).quiz.id,
+                    OngoingTests.objects.get(
+                        user=User.objects.get(uid=callback.message.chat.id)
+                    ).user_answers,
+                )
+
             is_finished = ongoing_tests[callback.message.chat.id].check_test(callback)
             if is_finished:
-                del ongoing_tests[callback.message.chat.id]
-                OngoingTests.objects.filter(user=User.objects.get(uid=callback.message.chat.id)).delete()
+                del ongoing_tests[callback.message.chat.id]  # Remove the test from the ongoing list
+                OngoingTests.objects.filter(
+                    user=User.objects.get(uid=callback.message.chat.id)
+                ).delete()  # Delete the test from the database
+
     except Exception as e:
         logging.error(e)
