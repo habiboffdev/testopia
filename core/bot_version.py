@@ -134,7 +134,16 @@ def callback_handler(call: CallbackQuery):
             check_test(call)
         except Exception as e:
             logging.error(e)
-
+@bot.message_handler(commands=['test'])
+def test_by_id(msg: Message):
+    try:
+        text = msg.text
+        if len(text.split())>1:
+            bot.send_message(msg.chat.id, text.split()[1])
+        else:
+            bot.reply_to(msg, "Test id kiritilmadi")
+    except:
+        logging.error("ERROR(test_by_id): ", e)
 @bot.message_handler(commands=['tests'])
 @lock_non_registered(checker=is_registired, default=bot.notify_register)
 def tests_function(msg: Message):

@@ -3,7 +3,7 @@
 class Texts:
     def __init(self,lang = "uz"):
         self.lang = lang
-    welcome = "Assalomu alaykum"
+    welcome = "Assalomu alaykum"    
     register_call_back = "Ro'yxatdan o'tish"
     register = "Iltimos ro'yxatdan o'ting"
     register_step_username = "Iltimos usernameni kiriting"

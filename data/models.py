@@ -66,18 +66,6 @@ class UserTest(models.Model):
         return f"{self.user.username}-{self.quiz}"
     class Meta:
         verbose_name_plural = "User Tests"
-
-
-class UserAnswer(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    choices = models.ManyToManyField(UserChoice)
-    quiz = models.ForeignKey(TestModel, on_delete=models.CASCADE)
-    
-    def __str__(self):
-        return f"{self.user.username}"
-    class Meta:
-        verbose_name_plural = "User Answers"
-
 class OngoingTests(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     quiz = models.OneToOneField(TestModel, on_delete=models.CASCADE)
@@ -87,6 +75,18 @@ class OngoingTests(models.Model):
         return f"{self.user.username}-{self.quiz}"
     class Meta:
         verbose_name_plural = "Ongoing Tests"
+
+
+
+class UserAnswer(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    choices = models.ManyToManyField(UserChoice)
+    quiz = models.ForeignKey(TestModel, on_delete=models.CASCADE)
+    cached_test = models.ForeignKey(UserTest, on_delete=models.CASCADE,null=True,blank=True)
+    def __str__(self):
+        return f"{self.user.username}"
+    class Meta:
+        verbose_name_plural = "User Answers"
 
 
 
