@@ -115,7 +115,13 @@ bot = Testopia(token=settings.BOT_TOKEN)
 @bot.message_handler(commands=["start"])
 @lock_non_registered(checker=is_registired, default=bot.notify_register)
 def command_handler(msg: Message):
-    bot.send_message(msg.chat.id, bot.texts.welcome)
+    text = msg.text
+    if len(text.split()) > 1:
+        if text.split()[1].startswith('test'):
+            test_by_id(msg)
+    else:
+
+        bot.send_message(msg.chat.id, bot.texts.welcome)
 
 @bot.callback_query_handler(lambda call: True)
 def callback_handler(call: CallbackQuery):
@@ -134,15 +140,14 @@ def callback_handler(call: CallbackQuery):
             check_test(call)
         except Exception as e:
             logging.error(e)
-@bot.message_handler(commands=['test'])
+# @bot.message_handler(commands=['test'])
 def test_by_id(msg: Message):
     try:
         text = msg.text
-        if len(text.split())>1:
-            bot.send_message(msg.chat.id, text.split()[1])
-        else:
-            bot.reply_to(msg, "Test id kiritilmadi")
-    except:
+        test_id = text.split('=')[1]
+        # Call the test_info function
+        test_info(msg,test_id)
+    except Exception as e:
         logging.error("ERROR(test_by_id): ", e)
 @bot.message_handler(commands=['tests'])
 @lock_non_registered(checker=is_registired, default=bot.notify_register)
@@ -156,9 +161,9 @@ def tests_function(msg: Message):
     except Exception as e:
         print("ERROR(tests_function): ", e)
 ongoing_tests = dict()
-def test_info(msg : Message):
+def test_info(msg : Message, test_id: str = None):
     try:
-        test_id = msg.text.split("-")[0]
+        test_id = msg.text.split("-")[0] if test_id is None else test_id
         test_model = TestModel.objects.get(id=test_id)
         test_description = test_model.description
         test_number_of_questions = test_model.count
@@ -174,7 +179,7 @@ def test_step(msg:Message,test_id: str):
         # print(msg.chat.id)
         test_model = TestModel.objects.get(id=test_id)
         if OngoingTests.objects.filter(user=User.get(uid=msg.chat.id)).first() is not None:
-            bot.send_message(msg.chat.id,Texts.have_already_started)
+            bot.send_message(msg.chat.id,Texts.have_already_started, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(row_width=1).add(InlineKeyboardButton("Testga o'tish",callback_data="restart_test-"+test_id)))
             return
         test = Test(bot,msg.chat.id,test_id)
         # Completely useless
@@ -195,6 +200,11 @@ def check_test(callback: CallbackQuery):
             test_id = callback.data.split("-")[1]
             del_msg(callback.message)
             test_step(callback.message,test_id)
+        elif callback.data.startswith("restart_test-"):
+            test_id = callback.data.split("-")[1]
+            del_msg(callback.message)
+            test = ongoing_tests[callback.message.chat.id]
+            test.restart()
         else:
             is_finished = ongoing_tests[callback.message.chat.id].check_test(callback)
             if is_finished:
