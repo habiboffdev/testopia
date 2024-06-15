@@ -13,6 +13,8 @@ class Question(models.Model):
     is_multiple_choice = models.BooleanField(default=False)
     def __str__(self):
         return self.text
+    class Meta:
+        ordering = ['order']
 class TestModel(models.Model):
     name = models.TextField(max_length=500)
     user = models.ForeignKey(User, on_delete=models.CASCADE,null=True,blank=True)

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'test/css/style.css' %}">
+</head>
+<body>
+    <h1>{{ data.name|escapejs }}</h1>
+    <p>{{ data.description|escapejs }}</p>
+    <button onclick="start()">Start</button>
+    <div id="question-container"></div>
+    <div id="question-list" style="display:none;">
+        <h2>Question List</h2>
+        <ul id="question-list-ul"></ul>
+    </div>
+    <script>
+        var questions = JSON.parse('{{ questions|escapejs }}');
+        var choices = JSON.parse('{{ choices|escapejs }}');
+
+        var selectedChoices = {};
+
+        function showQuestion(question_number) {
+            var questionText = questions[question_number - 1]['text'];
+            var questionChoices = choices[question_number - 1];
+            var selectedChoice = selectedChoices[question_number];
+
+            document.getElementById('question-container').innerHTML = `
+                <h2>Question ${question_number}:</h2>
+                <p>${questionText}</p>
+                <ul id="option-list">
+                    ${questionChoices.map(choice => `
+                        <li>
+                            <label>
+                                <input type="radio" name="choice" value="${choice}" 
+                                    ${selectedChoice === choice ? 'checked' : ''} 
+                                    onchange="selectChoice(${question_number}, '${choice.replace(/'/g, "\\'")}')">
+                                ${choice}
+                            </label>
+                        </li>`).join('')}
+                </ul>
+            `;
+        }
+
+        function selectChoice(question_number, choice) {
+            selectedChoices[question_number] = choice;
+        }
+
+        function showQuestionList() {
+            document.getElementById('question-list').style.display = 'block';
+        }
+
+        function showQuestionNumber() {
+            document.getElementById('question-list-ul').innerHTML = '';
+            for (let i = 1; i <= questions.length; i++) {
+                document.getElementById('question-list-ul').innerHTML += `
+                    <li><a href="#" onclick="showQuestion(${i})">${i}</a></li>
+                `;
+            }
+        }
+
+        function start() {
+            showQuestion(1);
+            showQuestionNumber();
+            showQuestionList();
+        }
+    </script>
+</body>
+</html>

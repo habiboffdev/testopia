@@ -12,7 +12,7 @@ import pandas as pd
 # Utils
 from utils.testgenerator import TestGenerator
 from .forms import UploadFileForm
-
+from json import dumps
 
 # This function is not for requests, it is custom made
 def create_question(json, test:TestModel):
@@ -58,3 +58,16 @@ def upload_file(request: HttpRequest) -> HttpResponse:
     else:
         form = UploadFileForm()
     return render(request, 'upload.html', {'form': form})
+def solve_test(request,id):
+    try:
+        test = TestModel.objects.get(id=id)
+        questions = test.questions.all()
+        question_list = list(questions.values())
+        choices = dict()
+        for index in range(questions.__len__()):
+            choices[index] = list(Choice.objects.filter(question=questions[index]).values_list('text', flat=True))
+        # print(questions)
+        # print(choices)
+        return render(request, 'test.html', {'data': test, 'questions': dumps(question_list),'choices':dumps(choices)})
+    except Exception as e:
+        logging.error(e)

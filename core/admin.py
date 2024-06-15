@@ -4,3 +4,4 @@ from core import models
 @admin.register(models.User)
 class UserAdmin(admin.ModelAdmin):
     search_fields = ["uid", "full_name"]
+    list_display = ['username', 'full_name', 'rating', 'platform', 'step','is_active','is_superuser']

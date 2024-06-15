@@ -99,10 +99,8 @@ class User(AbstractBaseUser, PermissionsMixin, BaseLayer):
     rating = models.BigIntegerField(default=0)
     full_name = models.TextField(null=True, blank=True)
     username = models.CharField(
-        max_length=15, unique=True,
-        validators=[RegexValidator(regex='^[a-zA-Z0-9_]+$', message='Username can only contain letters, numbers and underscores', code=False)]
-    )
-    platform = models.CharField(max_length=2, choices=CHOICES, default=0)
+        max_length=15, unique=True,)
+    platform = models.IntegerField(choices=CHOICES, default=0)
     step = models.IntegerField(blank=True, null=True, default=0)
     temp_data = models.TextField(null=True, blank=True)
     magic_word = models.CharField(max_length=63, null=True, blank=True)
