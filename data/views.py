@@ -1,6 +1,10 @@
 # Create your views here.
 # Django
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+
+# Utils
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from .models import TestModel, Question, Choice
@@ -58,6 +62,9 @@ def upload_file(request: HttpRequest) -> HttpResponse:
     else:
         form = UploadFileForm()
     return render(request, 'upload.html', {'form': form})
+
+@login_required
+# @csrf_exempt
 def solve_test(request,id):
     try:
         test = TestModel.objects.get(id=id)
@@ -65,9 +72,23 @@ def solve_test(request,id):
         question_list = list(questions.values())
         choices = dict()
         for index in range(questions.__len__()):
-            choices[index] = list(Choice.objects.filter(question=questions[index]).values_list('text', flat=True))
+            choices[index] = list(Choice.objects.filter(question=questions[index]).values_list('text', 'id'))
         # print(questions)
-        # print(choices)
+        print(choices)
         return render(request, 'test.html', {'data': test, 'questions': dumps(question_list),'choices':dumps(choices)})
     except Exception as e:
         logging.error(e)
+        return HttpResponse("Error")
+
+@login_required
+@csrf_exempt
+def submit_test(request, id):
+    try:
+        user = request.user
+        # test = TestModel.objects.get(uid=request.POST['uid'])
+        # questions = test.questions.all()
+        selected_choices = request.POST
+        print(selected_choices)
+    except Exception as e:
+        logging.error(e)
+        return HttpResponse(e)

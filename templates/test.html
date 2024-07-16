@@ -9,7 +9,11 @@
     <h1>{{ data.name|escapejs }}</h1>
     <p>{{ data.description|escapejs }}</p>
     <button onclick="start()">Start</button>
-    <div id="question-container"></div>
+    <div id="question-container">
+        <form id= "question-form" method="POST" action="/test/{{ data.id }}/submit/">
+            {% csrf_token %}
+        </form>
+    </div>
     <div id="question-list" style="display:none;">
         <h2>Question List</h2>
         <ul id="question-list-ul"></ul>
@@ -25,20 +29,23 @@
             var questionChoices = choices[question_number - 1];
             var selectedChoice = selectedChoices[question_number];
 
-            document.getElementById('question-container').innerHTML = `
+            document.getElementById('question-form').innerHTML = `
+
                 <h2>Question ${question_number}:</h2>
                 <p>${questionText}</p>
                 <ul id="option-list">
                     ${questionChoices.map(choice => `
                         <li>
                             <label>
-                                <input type="radio" name="choice" value="${choice}" 
+                                <input type="radio" name="${choice.id}" value="${choice}" 
                                     ${selectedChoice === choice ? 'checked' : ''} 
                                     onchange="selectChoice(${question_number}, '${choice.replace(/'/g, "\\'")}')">
                                 ${choice}
                             </label>
+
                         </li>`).join('')}
                 </ul>
+                <button type="submit">Submit</button>
             `;
         }
 
