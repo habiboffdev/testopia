@@ -1,6 +1,7 @@
 # Testopia
 
-> **Web & Telegram Quiz Generator**
+> **Web & Telegram Quiz Generator**  
+> Originally developed two years ago for a Physics teacher to automate student testing; the codebase was uploaded subsequently.
 
 Testopia is a Django‑powered application that lets educators create and administer quizzes by simply uploading an Excel file of questions. Students can then take these quizzes either via a web interface or interactively through a Telegram bot.
 
